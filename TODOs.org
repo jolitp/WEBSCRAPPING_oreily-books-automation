@@ -1,0 +1,9 @@
+* books automation - TODOs
+** oreily
+*** search and get book pages
+*** download book
+**** test page
+https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
+
+** audiobookbay
+** pdf optimizer
