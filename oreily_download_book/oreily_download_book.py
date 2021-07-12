@@ -1,22 +1,25 @@
 #! /usr/bin/env python3
 
-# spell-checker: word jolitp pyautogui dhhpefjklgkmgeafimnjhojgjamoafof
+# spell-checker: word jolitp pyautogui lxml
 
 from pathlib import Path
 import time
+import os
+import re
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 import pyautogui
-
+from bs4 import BeautifulSoup
 from icecream import ic
 
 
 # paths
 CHROME_DRIVER_PATH = Path("/home/jolitp/Applications/chromedriver")
-
+DOWNLOADS_FOLDER_PATH = Path("/home/jolitp/Downloads/")
+CWD = Path(os.getcwd())
 
 # setup driver
 CHROME_OPTIONS = Options()
@@ -55,10 +58,35 @@ def login_oreilly():
 def go_to_book_page(url: str):
     time.sleep(3)
     DRIVER.get(url)
-    save_page("./book_main_page.html")
+    # save_page("./book_main_page.html")
+
+    page_source = DRIVER.page_source
+
+    soup = BeautifulSoup(page_source, "lxml")
+    list_of_h5s = soup.find_all("h5")
+    for index, chapter_tag in enumerate(list_of_h5s):
+        chapter_tag : str = str(chapter_tag)
+        soup = BeautifulSoup(chapter_tag, "lxml")
+        for element in soup.findAll("a"):
+            link = element.get("href")
+            full_link = "https://learning.oreilly.com" + link
+            title = element.text
+            chapter_order = index + 1
+
+            data = {
+                "title" : title,
+                "link" : full_link,
+                "order" : chapter_order
+            }
+
+            ic(data)
+
+        ...
     ...
 # endregion go_to_book_page(...) ---------------------------------- go_to_book_page(...)
 
+
+# region save_page(...) ================================================= save_page(...)
 def save_page(file_path:Path):
     ext_btn_img = "./ext_btn.png"
     ext_btn_pos = pyautogui.locateCenterOnScreen(ext_btn_img)
@@ -83,16 +111,30 @@ def save_page(file_path:Path):
     ic(ext_save_btn_pos)
     pyautogui.click(ext_save_btn_pos)
 
-    time.sleep(3)
+    time.sleep(1)
 
     ext_continue_save_btn_img = "./continue_save_btn.png"
     ext_continue_save_btn_pos = pyautogui.locateCenterOnScreen(ext_continue_save_btn_img)
     ic(ext_continue_save_btn_pos)
     pyautogui.click(ext_continue_save_btn_pos)
 
+    time.sleep(2)
 
+    page_title = DRIVER.title
+    ic(page_title)
 
+    saved_file_path = DOWNLOADS_FOLDER_PATH / "{}.html".format(page_title)
+    ic(saved_file_path)
+
+    src = saved_file_path
+    dst = CWD / "0_{}.html".format(page_title)
+    ic(src)
+    ic(dst)
+
+    os.rename(src, dst)
     ...
+# endregion save_page(...) ---------------------------------------------- save_page(...)
+
 
 # region main() ================================================================= main()
 def main():
@@ -106,4 +148,5 @@ def main():
 # region if __name__ == '__main__': ========================== if __name__ == '__main__':
 if __name__ == '__main__':
     main()
+    # test_re()
 # endregion if __name__ == '__main__': ----------------------- if __name__ == '__main__':

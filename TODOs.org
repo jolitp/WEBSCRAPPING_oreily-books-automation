@@ -8,10 +8,35 @@ https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 ***** DONE login at the site
 ***** DONE load book page
 ***** DONE download front page of the book
+***** DONE get page title
+***** DONE get the page from downloads folder and move to cwd
 ***** TODO get contents (on the right side)
 ****** TODO get list of chapters
-******* TODO nest the lists
-example: if there is a Part I section with other sub links, treat the links below as sub links
+******* DONE get only the chapter links
+not the sections of the chapters
+******* DONE get chapter title
+******* DONE get chapter link
+******* DONE concatenate the chapter link to the site url
+or else it wont point to the right place
+
+the link starts at /library/...
+
+the book main page is:
+https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
+
+the number after the book name is not the ISBN, it is an ID from oreilly
+******* TODO get chapter order number
+***** TODO go to each link from each chapter
+****** TODO wait until the page is loaded
+****** TODO close the right side bar containing the toc
+****** TODO click on the gear to the left
+******* TODO make the font bigger
+******* TODO make the theme darker
+******* TODO make the margins smaller
+****** TODO scroll down to the end of the page
+****** TODO save the page
+****** TODO name the page apropriately
+****** TODO move the page to cwd
 
 ***** TODO get info
 ****** TODO book title
