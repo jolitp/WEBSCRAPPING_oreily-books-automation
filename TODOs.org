@@ -28,5 +28,9 @@ with the errata link
 ****** TODO get all reviews
 ***** TODO put info into an org file
 ***** TODO download cover picture
+***** TODO go to each link in the contents part
+****** TODO wait the text to show
+****** TODO click on the right menu icon to hide the side bar
+****** TODO save the page
 ** audiobookbay
 ** pdf optimizer
