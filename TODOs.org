@@ -4,6 +4,29 @@
 *** download book
 **** test page
 https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
+**** steps
+***** DONE login at the site
+***** DONE load book page
+***** TODO download front page of the book
+***** TODO get contents (on the right side)
+****** TODO get list of chapters
+******* TODO nest the lists
+example: if there is a Part I section with other sub links, treat the links below as sub links
 
+***** TODO get info
+****** TODO book title
+****** TODO time to complete
+****** TODO topics
+****** TODO published by
+****** TODO publication date
+****** TODO review stars
+****** TODO author's name
+****** TODO description text
+****** TODO about the publisher
+****** TODO resources sections
+with the errata link
+****** TODO get all reviews
+***** TODO put info into an org file
+***** TODO download cover picture
 ** audiobookbay
 ** pdf optimizer
