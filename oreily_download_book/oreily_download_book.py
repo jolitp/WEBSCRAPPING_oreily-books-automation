@@ -9,6 +9,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
+import pyautogui
+
 from icecream import ic
 
 
@@ -58,10 +60,38 @@ def go_to_book_page(url: str):
 # endregion go_to_book_page(...) ---------------------------------- go_to_book_page(...)
 
 def save_page(file_path:Path):
-    page_src = DRIVER.page_source
-    with open(file_path, "w") as file_obj:
-        file_obj.writelines(page_src)
-        ...
+    ext_btn_img = "./ext_btn.png"
+    ext_btn_pos = pyautogui.locateCenterOnScreen(ext_btn_img)
+    ic(ext_btn_pos)
+    pyautogui.click(ext_btn_pos)
+
+    time.sleep(.5)
+
+    ext_pin_btn_img = "./ext_pin_btn.png"
+    ext_pin_btn_pos = pyautogui.locateCenterOnScreen(ext_pin_btn_img)
+    ic(ext_pin_btn_pos)
+    pyautogui.click(ext_pin_btn_pos)
+
+    time.sleep(.5)
+
+    pyautogui.click(ext_btn_pos)
+
+    time.sleep(.5)
+
+    ext_save_btn_img = "./ext_save_btn.png"
+    ext_save_btn_pos = pyautogui.locateCenterOnScreen(ext_save_btn_img)
+    ic(ext_save_btn_pos)
+    pyautogui.click(ext_save_btn_pos)
+
+    time.sleep(3)
+
+    ext_continue_save_btn_img = "./continue_save_btn.png"
+    ext_continue_save_btn_pos = pyautogui.locateCenterOnScreen(ext_continue_save_btn_img)
+    ic(ext_continue_save_btn_pos)
+    pyautogui.click(ext_continue_save_btn_pos)
+
+
+
     ...
 
 # region main() ================================================================= main()
