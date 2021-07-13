@@ -68,15 +68,16 @@ def go_to_book_page(url: str):
     time.sleep(3)
     DRIVER.get(url)
 
-    save_page(url)
+    # save_page(url)
 
+    time.sleep(1)
     page_source = DRIVER.page_source
 
     soup = BeautifulSoup(page_source, "lxml")
     list_of_h5s = soup.find_all("h5")
 
     links_to_visit = []
-    for index, chapter_tag in enumerate(list_of_h5s):
+    for chapter_tag in list_of_h5s:
         chapter_tag : str = str(chapter_tag)
         soup = BeautifulSoup(chapter_tag, "lxml")
         for element in soup.findAll("a"):
@@ -84,11 +85,61 @@ def go_to_book_page(url: str):
             full_link = "https://learning.oreilly.com" + link
             links_to_visit.append(full_link)
 
+    # testing for one page first
+    link_to_test = links_to_visit[2]
+
+    DRIVER.get(link_to_test)
+
+    set_text_style()
+
     for link_to_visit in links_to_visit:
         # ic(link_to_visit)
         ...
     ...
+
 # endregion go_to_book_page(...) ---------------------------------- go_to_book_page(...)
+
+
+# region set_text_style() ========================================= set_text_style()
+def set_text_style():
+    cog_light_img = "./img/cog_light.png"
+    cog_light_pos = pyautogui.locateCenterOnScreen(cog_light_img)
+    ic(cog_light_pos)
+    pyautogui.click(cog_light_pos)
+
+    time.sleep(.5)
+
+    text_options_large_text_img = "./img/text_options_large_text.png"
+    text_options_large_text_pos = pyautogui \
+        .locateCenterOnScreen(text_options_large_text_img)
+    ic(text_options_large_text_pos)
+    pyautogui.click(text_options_large_text_pos)
+
+    time.sleep(.5)
+
+    text_options_small_borders_img = "./img/text_options_small_borders.png"
+    text_options_small_borders_pos = pyautogui \
+        .locateCenterOnScreen(text_options_small_borders_img)
+    ic(text_options_small_borders_pos)
+    pyautogui.click(text_options_small_borders_pos)
+
+    time.sleep(.5)
+
+    text_options_dark_mode_img = "./img/text_options_dark_mode.png"
+    text_options_dark_mode_pos = pyautogui \
+        .locateCenterOnScreen(text_options_dark_mode_img)
+    ic(text_options_dark_mode_pos)
+    pyautogui.click(text_options_dark_mode_pos)
+
+    time.sleep(.5)
+
+    text_options_close_img = "./img/text_options_close.png"
+    text_options_close_pos = pyautogui \
+        .locateCenterOnScreen(text_options_close_img)
+    ic(text_options_close_pos)
+    pyautogui.click(text_options_close_pos)
+    ...
+# endregion set_text_style() ----------------------------------------- set_text_style()
 
 
 # region save_page(...) ================================================= save_page(...)
@@ -143,7 +194,7 @@ def save_page(url):
     os.rename(src, dst)
 
     book_chapter_links.append(url)
-    ...
+
 # endregion save_page(...) ---------------------------------------------- save_page(...)
 
 

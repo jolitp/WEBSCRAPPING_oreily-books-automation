@@ -27,12 +27,13 @@ https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 the number after the book name is not the ISBN, it is an ID from oreilly
 ******* DONE get chapter order number
 ***** TODO go to each link from each chapter
-****** TODO wait until the page is loaded
+****** TODO check to see if need to change font, or if it is saved
+****** DONE click on the gear to the left
+******* DONE make the font bigger
+******* DONE make the theme darker
+******* DONE make the margins smaller
 ****** TODO close the right side bar containing the toc
-****** TODO click on the gear to the left
-******* TODO make the font bigger
-******* TODO make the theme darker
-******* TODO make the margins smaller
+****** TODO wait until the page is loaded
 ****** TODO scroll down to the end of the page
 ****** TODO save the page
 ****** TODO name the page apropriately
