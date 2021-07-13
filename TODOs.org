@@ -10,8 +10,8 @@ https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 ***** DONE download front page of the book
 ***** DONE get page title
 ***** DONE get the page from downloads folder and move to cwd
-***** TODO get contents (on the right side)
-****** TODO get list of chapters
+***** DONE get contents (on the right side)
+****** DONE get list of chapters
 ******* DONE get only the chapter links
 not the sections of the chapters
 ******* DONE get chapter title
@@ -25,7 +25,7 @@ the book main page is:
 https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 
 the number after the book name is not the ISBN, it is an ID from oreilly
-******* TODO get chapter order number
+******* DONE get chapter order number
 ***** TODO go to each link from each chapter
 ****** TODO wait until the page is loaded
 ****** TODO close the right side bar containing the toc

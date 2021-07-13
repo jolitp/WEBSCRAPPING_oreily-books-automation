@@ -20,17 +20,26 @@ from icecream import ic
 CHROME_DRIVER_PATH = Path("/home/jolitp/Applications/chromedriver")
 DOWNLOADS_FOLDER_PATH = Path("/home/jolitp/Downloads/")
 CWD = Path(os.getcwd())
-
-# setup driver
-CHROME_OPTIONS = Options()
-CHROME_OPTIONS.add_extension("./ext.zip")
-DRIVER = webdriver.Chrome(CHROME_DRIVER_PATH, chrome_options=CHROME_OPTIONS)
-DRIVER.maximize_window()
+DRIVER = None
 
 
 # login information
 EMAIL = "libed17686@advew.com"
 PASSWORD = "h3dg3h0g"
+
+book_chapter_links = []
+
+
+# region setup_driver() ================================================== setup_driver()
+def setup_driver():
+    CHROME_OPTIONS = Options()
+    CHROME_OPTIONS.add_extension("./ext.zip")
+
+    global DRIVER
+    DRIVER = webdriver.Chrome(CHROME_DRIVER_PATH, chrome_options=CHROME_OPTIONS)
+    DRIVER.maximize_window()
+    ...
+# endregion setup_driver() ----------------------------------------------- setup_driver()
 
 
 # region login_oreilly() ================================================ login_oreilly()
@@ -58,44 +67,40 @@ def login_oreilly():
 def go_to_book_page(url: str):
     time.sleep(3)
     DRIVER.get(url)
-    # save_page("./book_main_page.html")
+
+    save_page(url)
 
     page_source = DRIVER.page_source
 
     soup = BeautifulSoup(page_source, "lxml")
     list_of_h5s = soup.find_all("h5")
+
+    links_to_visit = []
     for index, chapter_tag in enumerate(list_of_h5s):
         chapter_tag : str = str(chapter_tag)
         soup = BeautifulSoup(chapter_tag, "lxml")
         for element in soup.findAll("a"):
             link = element.get("href")
             full_link = "https://learning.oreilly.com" + link
-            title = element.text
-            chapter_order = index + 1
+            links_to_visit.append(full_link)
 
-            data = {
-                "title" : title,
-                "link" : full_link,
-                "order" : chapter_order
-            }
-
-            ic(data)
-
+    for link_to_visit in links_to_visit:
+        # ic(link_to_visit)
         ...
     ...
 # endregion go_to_book_page(...) ---------------------------------- go_to_book_page(...)
 
 
 # region save_page(...) ================================================= save_page(...)
-def save_page(file_path:Path):
-    ext_btn_img = "./ext_btn.png"
+def save_page(url):
+    ext_btn_img = "./img/ext_btn.png"
     ext_btn_pos = pyautogui.locateCenterOnScreen(ext_btn_img)
     ic(ext_btn_pos)
     pyautogui.click(ext_btn_pos)
 
     time.sleep(.5)
 
-    ext_pin_btn_img = "./ext_pin_btn.png"
+    ext_pin_btn_img = "./img/ext_pin_btn.png"
     ext_pin_btn_pos = pyautogui.locateCenterOnScreen(ext_pin_btn_img)
     ic(ext_pin_btn_pos)
     pyautogui.click(ext_pin_btn_pos)
@@ -106,14 +111,14 @@ def save_page(file_path:Path):
 
     time.sleep(.5)
 
-    ext_save_btn_img = "./ext_save_btn.png"
+    ext_save_btn_img = "./img/ext_save_btn.png"
     ext_save_btn_pos = pyautogui.locateCenterOnScreen(ext_save_btn_img)
     ic(ext_save_btn_pos)
     pyautogui.click(ext_save_btn_pos)
 
     time.sleep(1)
 
-    ext_continue_save_btn_img = "./continue_save_btn.png"
+    ext_continue_save_btn_img = "./img/continue_save_btn.png"
     ext_continue_save_btn_pos = pyautogui.locateCenterOnScreen(ext_continue_save_btn_img)
     ic(ext_continue_save_btn_pos)
     pyautogui.click(ext_continue_save_btn_pos)
@@ -123,21 +128,28 @@ def save_page(file_path:Path):
     page_title = DRIVER.title
     ic(page_title)
 
-    saved_file_path = DOWNLOADS_FOLDER_PATH / "{}.html".format(page_title)
+    book_folder_path = CWD / page_title
+    if not os.path.isdir(book_folder_path):
+        os.mkdir(book_folder_path)
+    saved_file_path = DOWNLOADS_FOLDER_PATH / f"{page_title}.html"
     ic(saved_file_path)
 
     src = saved_file_path
-    dst = CWD / "0_{}.html".format(page_title)
+    index = len(book_chapter_links)
+    dst = book_folder_path / f"{index}_{page_title}.html"
     ic(src)
     ic(dst)
 
     os.rename(src, dst)
+
+    book_chapter_links.append(url)
     ...
 # endregion save_page(...) ---------------------------------------------- save_page(...)
 
 
 # region main() ================================================================= main()
 def main():
+    setup_driver()
     login_oreilly()
     url = "https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/"
     go_to_book_page(url)
@@ -148,5 +160,4 @@ def main():
 # region if __name__ == '__main__': ========================== if __name__ == '__main__':
 if __name__ == '__main__':
     main()
-    # test_re()
 # endregion if __name__ == '__main__': ----------------------- if __name__ == '__main__':
