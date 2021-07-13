@@ -11,16 +11,21 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
+from rich.console import Console
+from rich.traceback import install as rich_traceback_install
+
 import pyautogui
+from pyautogui import Point
 from bs4 import BeautifulSoup
 from icecream import ic
 
+rich_traceback_install()
 
-# paths
 CHROME_DRIVER_PATH = Path("/home/jolitp/Applications/chromedriver")
 DOWNLOADS_FOLDER_PATH = Path("/home/jolitp/Downloads/")
 CWD = Path(os.getcwd())
 DRIVER = None
+CONSOLE = Console()
 
 
 # login information
@@ -31,6 +36,20 @@ book_chapter_links = []
 book_name : str = ""
 
 
+# region img_pos(...) ====================================================== img_pos(...)
+def img_center_pos(img_path:str) -> Point:
+    return pyautogui.locateCenterOnScreen(img_path)
+# endregion img_pos(...) --------------------------------------------------- img_pos(...)
+
+
+# region click_on_img(...) ============================================ click_on_img(...)
+def click_on_img(img_path:str) -> Point:
+    pos = img_center_pos(img_path)
+    pyautogui.click(pos)
+    return pos
+# endregion click_on_img(...) ----------------------------------------- click_on_img(...)
+
+
 # region setup_driver() ================================================== setup_driver()
 def setup_driver():
     CHROME_OPTIONS = Options()
@@ -39,7 +58,6 @@ def setup_driver():
     global DRIVER
     DRIVER = webdriver.Chrome(CHROME_DRIVER_PATH, chrome_options=CHROME_OPTIONS)
     DRIVER.maximize_window()
-    ...
 # endregion setup_driver() ----------------------------------------------- setup_driver()
 
 
@@ -97,32 +115,23 @@ def go_to_book_page(url: str):
 
     time.sleep(1)
 
-    # testing for one page first
-    link_to_test = links_to_visit[2]
-
-    DRIVER.get(link_to_test)
-
-    hide_toc_img = "./img/hide_toc_dark.png"
-    hide_toc_pos = pyautogui \
-        .locateCenterOnScreen(hide_toc_img)
-    # ic(hide_toc_pos)
-    if hide_toc_pos:
-        pyautogui.click(hide_toc_pos)
-    else:
-        set_text_style()
-        time.sleep(.5)
-        hide_toc_img = "./img/hide_toc_dark.png"
-        hide_toc_pos = pyautogui \
-            .locateCenterOnScreen(hide_toc_img)
-        # ic(hide_toc_pos)
-        pyautogui.click(hide_toc_pos)
-
-    time.sleep(1)
-
-    save_page(link_to_test)
-
     for link_to_visit in links_to_visit:
-        # ic(link_to_visit)
+        DRIVER.get(link_to_visit)
+
+        hide_toc_pos = img_center_pos("./img/hide_toc_dark.png")
+        if hide_toc_pos:
+            pyautogui.click(hide_toc_pos)
+        else:
+            set_text_style()
+
+            time.sleep(.5)
+
+            hide_toc_pos = img_center_pos("./img/hide_toc_dark.png")
+            pyautogui.click(hide_toc_pos)
+
+        time.sleep(1)
+
+        save_page(link_to_visit)
         ...
     ...
 
@@ -170,69 +179,57 @@ def set_text_style():
 # endregion set_text_style() ----------------------------------------- set_text_style()
 
 
+# region pin_save_ext_on_bar(...) ============================ pin_save_ext_on_bar(...)
+def pin_save_ext_on_bar(delay:float):
+    # open the extensions panel
+    ext_btn_pos = click_on_img("./img/ext_btn.png")
+
+    time.sleep(delay)
+
+    # pin the extension
+    ext_pin_btn_pos = click_on_img("./img/ext_pin_btn.png")
+
+    time.sleep(delay)
+
+    # close the extensions panel
+    pyautogui.click(ext_btn_pos)
+
+    time.sleep(delay)
+
+    # get the position of the save button
+    return img_center_pos("./img/ext_save_btn.png")
+# region pin_save_ext_on_bar(...) ----------------------------- pin_save_ext_on_bar(...)
+
+
 # region save_page(...) ================================================= save_page(...)
 def save_page(url):
     # get the position of save button
     ext_save_btn_img = "./img/ext_save_btn.png"
     ext_save_btn_pos = pyautogui.locateCenterOnScreen(ext_save_btn_img)
-    # ic(ext_save_btn_pos)
 
     # check if save button has already been pinned to bar
     if not ext_save_btn_pos:
-        # open the extensions panel
-        ext_btn_img = "./img/ext_btn.png"
-        ext_btn_pos = pyautogui.locateCenterOnScreen(ext_btn_img)
-        # ic(ext_btn_pos)
-        pyautogui.click(ext_btn_pos)
-
-        time.sleep(1)
-
-        # pin the extension
-        ext_pin_btn_img = "./img/ext_pin_btn.png"
-        ext_pin_btn_pos = pyautogui.locateCenterOnScreen(ext_pin_btn_img)
-        # ic(ext_pin_btn_pos)
-        pyautogui.click(ext_pin_btn_pos)
-
-        time.sleep(1)
-
-        # close the extensions panel
-        pyautogui.click(ext_btn_pos)
-
-        time.sleep(1)
-
-        # get the position of the save button
-        ext_save_btn_img = "./img/ext_save_btn.png"
-        ext_save_btn_pos = pyautogui.locateCenterOnScreen(ext_save_btn_img)
-        # ic(ext_save_btn_pos)
-
-    # click on the save button
+        ext_save_btn_pos = pin_save_ext_on_bar(1)
     pyautogui.click(ext_save_btn_pos)
 
     # wait for the confirmation popup to appear
     waiting_for_save : bool = True
     while waiting_for_save:
-        # click on the confirmation that appears
-        ext_continue_save_btn_img = "./img/continue_save_btn.png"
-        ext_continue_save_btn_pos = pyautogui \
-            .locateCenterOnScreen(ext_continue_save_btn_img)
-        # ic(ext_continue_save_btn_pos)
-
-        if ext_continue_save_btn_pos:
+        continue_save_btn_pos = img_center_pos("./img/continue_save_btn.png")
+        if continue_save_btn_pos:
             waiting_for_save = False
 
-    pyautogui.click(ext_continue_save_btn_pos)
+    # click on the confirmation that appears
+    pyautogui.click(continue_save_btn_pos)
 
     time.sleep(1)
 
     page_title = DRIVER.title
-    # ic(page_title)
     page_title = page_title.replace("|", "_")
+    page_title = page_title.replace(":", "_")
 
-# BUG main page being saved to cwd instead of ./[name of book]
     global book_name
-    ic(book_name)
     book_folder_path = CWD / book_name
-    ic(book_folder_path)
     if not os.path.isdir(book_folder_path):
         os.mkdir(book_folder_path)
 
@@ -241,20 +238,13 @@ def save_page(url):
 
     time.sleep(3)
 
-    file_was_saved = os.path.isfile(saved_file_path)
-    # ic(file_was_saved)
-
-
     src = saved_file_path
     index = len(book_chapter_links)
     dst = book_folder_path / f"{index}_{page_title}.html"
-    # ic(src)
-    # ic(dst)
 
     os.rename(src, dst)
 
     book_chapter_links.append(url)
-
 # endregion save_page(...) ---------------------------------------------- save_page(...)
 
 
@@ -264,7 +254,8 @@ def main():
     login_oreilly()
     url = "https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/"
     go_to_book_page(url)
-    ...
+    DRIVER.close()
+    CONSOLE.print("[bold green]finished[/]")
 # endregion main() -------------------------------------------------------------- main()
 
 

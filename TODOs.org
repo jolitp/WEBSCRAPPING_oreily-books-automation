@@ -27,26 +27,24 @@ https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 the number after the book name is not the ISBN, it is an ID from oreilly
 ******* DONE get chapter order number
 ***** TODO go to each link from each chapter
-****** TODO check to see if need to change font, or if it is saved
 ****** DONE click on the gear to the left
 ******* DONE scroll down the page
 so the download panel don't interfere
 ******* DONE make the font bigger
 ******* DONE make the theme darker
 ******* DONE make the margins smaller
-******* TODO close the options popup
+******* DONE close the options popup
 check for both possible icons
 ****** DONE close the right side bar containing the toc
-****** TODO wait until the page is loaded
-****** TODO scroll down to the end of the page
+****** DONE scroll down to the end of the page
 ****** DONE save the page
 ****** TODO get a list of all files in the downloads directory
-****** TODO remove special characters from the name
+****** DONE remove special characters from the name
 for now the problem is the | character
-****** TODO name the page apropriately
-****** TODO move the page to cwd
-****** TODO remove special characters from filename
-
+also the : is replaced too
+****** DONE name the page apropriately
+****** DONE move the page to cwd
+***** TODO make an org file with each chapter and sub chapter/header
 ***** TODO get info
 ****** TODO book title
 ****** TODO time to complete
