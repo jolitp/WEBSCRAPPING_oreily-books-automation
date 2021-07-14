@@ -45,12 +45,11 @@ for now the problem is the | character
 also the : is replaced too
 ****** DONE name the page apropriately
 ****** DONE move the page to cwd
-***** TODO make an org file with each chapter and sub chapter/header
 ***** TODO get info
 get this info from the saved files
 ****** TODO book title
 ****** TODO time to complete
-****** TODO topics
+****** TODO topics (classification)
 ****** TODO published by
 ****** TODO publication date
 ****** TODO review stars
@@ -60,7 +59,8 @@ get this info from the saved files
 ****** TODO resources sections
 with the errata link
 ****** TODO get all reviews
+****** DONE chapter hierarchy
 ***** TODO put info into an org file
-***** TODO download cover picture
+***** DONE download cover picture
 ** audiobookbay
 ** pdf optimizer
