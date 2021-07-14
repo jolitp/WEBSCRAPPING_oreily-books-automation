@@ -6,6 +6,7 @@
 https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 **** steps
 ***** DONE login at the site
+***** TODO check if the login was successful
 ***** DONE load book page
 ***** DONE download front page of the book
 ***** DONE get page title
@@ -46,6 +47,7 @@ also the : is replaced too
 ****** DONE move the page to cwd
 ***** TODO make an org file with each chapter and sub chapter/header
 ***** TODO get info
+get this info from the saved files
 ****** TODO book title
 ****** TODO time to complete
 ****** TODO topics
@@ -60,9 +62,5 @@ with the errata link
 ****** TODO get all reviews
 ***** TODO put info into an org file
 ***** TODO download cover picture
-***** TODO go to each link in the contents part
-****** TODO wait the text to show
-****** TODO click on the right menu icon to hide the side bar
-****** TODO save the page
 ** audiobookbay
 ** pdf optimizer
