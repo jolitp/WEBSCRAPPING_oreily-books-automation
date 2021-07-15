@@ -47,19 +47,22 @@ also the : is replaced too
 ****** DONE move the page to cwd
 ***** TODO get info
 get this info from the saved files
-****** TODO book title
-****** TODO time to complete
-****** TODO topics (classification)
-****** TODO published by
-****** TODO publication date
+****** DONE book title
+****** DONE time to complete
+****** DONE topics (classification)
+****** DONE published by
+****** DONE publication date
 ****** TODO review stars
-****** TODO author's name
-****** TODO description text
+****** DONE author's name
+****** DONE description text
 ****** TODO about the publisher
 ****** TODO resources sections
 with the errata link
 ****** TODO get all reviews
 ****** DONE chapter hierarchy
+***** TODO save description in markdown
+***** TODO convert markdown to org via pandoc
+***** TODO put the converted description in the org document with the other info
 ***** TODO put info into an org file
 ***** DONE download cover picture
 ** audiobookbay

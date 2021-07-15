@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 
-# spell-checker: word jolitp pyautogui lxml
+# spell-checker: word jolitp pyautogui lxml chdir currentsrc cmdline
 
 # region imports
 from pathlib import Path
 import time
+# from datetime import datetime
 import datetime
 from datetime import date
 import os
@@ -26,6 +27,8 @@ from pyautogui import Point
 
 from bs4 import BeautifulSoup
 
+import html2text
+
 from natsort import natsorted, ns
 
 from icecream import ic
@@ -36,7 +39,7 @@ from icecream import ic
 
 @dataclass
 class Chapter:
-    """Class for keeping track of an item in inventory."""
+    """A chapter from a book. contains sections."""
     title: str = ""
     sections: list = field(default_factory=list)
 
@@ -55,13 +58,27 @@ class Chapter:
 
 
 @dataclass
+class Topic:
+    """Topic of a book"""
+    name : str = ""
+    link : str = ""
+
+
+@dataclass
+class Publisher:
+    """A publisher of a book"""
+    name : str = ""
+    link : str = ""
+
+
+@dataclass
 class Book:
-    """Class for keeping track of an item in inventory."""
+    """The data for a book"""
     title: str = ""
     author: str = ""
     time_to_complete: time = None
-    topics: str = ""
-    publisher: str = ""
+    topics: Topic = None
+    publisher: Publisher = None
     # publisher_info: str = ""
     # resources_section: str = ""
     publication_date: date = None
@@ -110,7 +127,7 @@ CWD = Path(os.getcwd())
 DRIVER = None
 CONSOLE = Console()
 
-login_page = \
+LOGIN_PAGE = \
 "https://www.oreilly.com/member/login/?next=%2Fapi%2Fv1%2Fauth%2Fopenid%2Fauthorize%2F%3Fclient_id%3D235442%26redirect_uri%3Dhttps%3A%2F%2Flearning.oreilly.com%2Fcomplete%2Funified%2F%26state%3DpZpBIOIX0XRGL904QflVYoD4p59R7Cjm%26response_type%3Dcode%26scope%3Dopenid%2Bprofile%2Bemail&locale=en"
 # login information
 # registered at: 2021/07/14
@@ -120,10 +137,9 @@ PASSWORD = "H3dg3h0g"
 
 
 # region globals
-book_chapter_links = []
-book_name : str = ""
-book_folder_path = None
-book_data = Book()
+BOOK_CHAPTER_LINKS = []
+BOOK_FOLDER_PATH = None
+BOOK_DATA = Book()
 # endregion globals
 
 
@@ -162,7 +178,7 @@ def setup_driver():
 # region login_oreilly() ================================================ login_oreilly()
 def login_oreilly():
     # open site
-    DRIVER.get(login_page)
+    DRIVER.get(LOGIN_PAGE)
     # get email filed element and insert email
     email_field = DRIVER.find_element_by_xpath("//input[@name='email']")
     email_field.clear()
@@ -208,12 +224,11 @@ def go_to_book_page(url: str):
     def check_if_login_is_successful():
         ...
     page_source = DRIVER.page_source
-    global book_name
-    global book_folder_path
-    book_name = DRIVER.title
-    book_data = Book()
-    book_data.title = book_name
-    book_folder_path = CWD / book_name
+    global BOOK_FOLDER_PATH
+    global BOOK_DATA
+    BOOK_DATA = Book()
+    BOOK_DATA.title = DRIVER.title
+    BOOK_FOLDER_PATH = CWD / BOOK_DATA.title
 
     return None # uncomment to test w/o saving pages
 
@@ -325,8 +340,8 @@ def save_page(url):
     page_title = page_title.replace("|", "_")
     page_title = page_title.replace(":", "_")
 
-    if not book_folder_path.exists():
-        book_folder_path.mkdir()
+    if not BOOK_FOLDER_PATH.exists():
+        BOOK_FOLDER_PATH.mkdir()
 
     saved_file_path = DOWNLOADS_FOLDER_PATH / f"{page_title}.html"
     # ic(saved_file_path)
@@ -334,12 +349,12 @@ def save_page(url):
     time.sleep(3)
 
     src = saved_file_path
-    index = len(book_chapter_links)
-    dst = book_folder_path / f"{index}_{page_title}.html"
+    index = len(BOOK_CHAPTER_LINKS)
+    dst = BOOK_FOLDER_PATH / f"{index}_{page_title}.html"
 
     os.rename(src, dst)
 
-    book_chapter_links.append(url)
+    BOOK_CHAPTER_LINKS.append(url)
 # endregion save_page(...) ---------------------------------------------- save_page(...)
 
 
@@ -362,7 +377,7 @@ def get_chapter_sections(chapter_files):
     chapter_sections = []
     # go over each file skipping the first file("main" book page)
     for chapter_file in chapter_files[1:]:
-        with open(book_folder_path / chapter_file ) as file_obj:
+        with open(BOOK_FOLDER_PATH / chapter_file ) as file_obj:
             sections = []
             soup : BeautifulSoup = BeautifulSoup(file_obj, features="lxml")
             section_elements = soup.find_all("section",
@@ -379,10 +394,25 @@ def get_chapter_sections(chapter_files):
 # endregion get_chapter_sections() -------------------------------- get_chapter_sections()
 
 
+# region get_saved_pages() ============================================ get_saved_pages()
+def get_saved_pages() -> list:
+    chapter_files = os.listdir(BOOK_FOLDER_PATH)
+    chapter_files = natsorted(chapter_files, alg=ns.PATH)
+    return chapter_files
+# endregion get_saved_pages() ----------------------------------------- get_saved_pages()
+
+
+# region get_main_page_from_saved_files() ============== get_main_page_from_saved_files()
+def get_main_page_from_saved_files() -> str:
+    chapter_files = get_saved_pages()
+    return chapter_files[0]
+# endregion get_main_page_from_saved_files() ---------- get_main_page_from_saved_files()
+
+
 # region get_chapter_hierarchy() ================================ get_chapter_hierarchy()
 def get_chapter_hierarchy():
     # get files inside book folder
-    chapter_files = os.listdir(book_folder_path)
+    chapter_files = os.listdir(BOOK_FOLDER_PATH)
     chapter_files = natsorted(chapter_files, alg=ns.PATH)
 
     chapter_titles = get_chapter_names(chapter_files)
@@ -393,56 +423,139 @@ def get_chapter_hierarchy():
         chapter_data.sections = sections
         chapter_data.title = title
         # chapter_data.print()
-        global book_data
-        book_data.chapters.append(chapter_data)
+        global BOOK_DATA
+        BOOK_DATA.chapters.append(chapter_data)
 # endregion get_chapter_hierarchy() ============================= get_chapter_hierarchy()
 
 
 # region get_cover_picture() ======================================== get_cover_picture()
 def get_cover_picture():
-    chapter_files = os.listdir(book_folder_path)
-    chapter_files = natsorted(chapter_files, alg=ns.PATH)
+    main_page_file = get_main_page_from_saved_files()
 
-    main_page_file = chapter_files[0]
-    ic(main_page_file)
-
-    with open(book_folder_path / main_page_file, "r") as file_obj:
+    with open(BOOK_FOLDER_PATH / main_page_file, "r") as file_obj:
         soup = BeautifulSoup(file_obj, features="lxml")
         img_element = soup.find("img", attrs={"src" : True})
         img_url = img_element["data-savepage-currentsrc"]
-        os.chdir(book_folder_path)
+        os.chdir(BOOK_FOLDER_PATH)
         cmd = [ "wget", '-O','cover.jpeg' , img_url]
-        cmd_str = subprocess.list2cmdline(cmd)
-        ic(cmd)
-        ic(cmd_str)
+        # cmd_str = subprocess.list2cmdline(cmd)
+        # ic(cmd)
+        # ic(cmd_str)
         subprocess.run(cmd)
         os.chdir(CWD)
-
-
 # endregion get_cover_picture() ------------------------------------- get_cover_picture()
+
+
+# region get_author_name() ============================================ get_author_name()
+def get_data_from_saved_page():
+    main_page_file = get_main_page_from_saved_files()
+
+    with open(BOOK_FOLDER_PATH / main_page_file, "r") as file_obj:
+        soup = BeautifulSoup(file_obj, features="lxml")
+# region get author's name
+        element = soup.find("div", attrs={"class" : re.compile("contributors--*")})
+        BOOK_DATA.author = element.a.text
+        del element
+# endregion get author's name
+# region get stats block
+        stats_element = soup.find_all("div", attrs={"class" : re.compile("statBlock--")})
+        for stat in stats_element:
+            stat = str(stat)
+# region get time to complete
+            time_to_complete = "TIME TO COMPLETE:"
+            if time_to_complete in stat:
+                length = len(time_to_complete)
+                pos = stat.find(time_to_complete)
+                start = pos + length
+                stat: str = stat[start:]
+                stat = stat.replace("</span><span>", "")
+                stat = stat.replace("</span></div>", "")
+
+                hours, minutes = stat.split(" ")
+                hours = int(hours[:-1])
+                minutes = int(minutes[:-1])
+
+                time_to_complete = datetime.time(hours, minutes)
+                BOOK_DATA.time_to_complete = time_to_complete
+# endregion get time to complete
+# region get toopics
+            topics = "TOPICS:"
+            if topics in stat:
+                length = len(topics)
+                pos = stat.find(topics)
+                start = pos + length
+                stat: str = stat[start:]
+                stat = stat.replace("</span><span>", "")
+                stat = stat.replace("</span></div>", "")
+                stat = stat.replace('<a class="orm-Link-root" ', "")
+                stat = stat.replace('</a>', "")
+                stat = stat.replace('href="', "")
+
+                topic_link, topic_name = stat.split('">')
+                topic = Topic(topic_name, topic_link)
+                BOOK_DATA.topics = topic
+# endregion get toopics
+# region get bublisher
+            published_by = "PUBLISHED BY:"
+            if published_by in stat:
+                length = len(published_by)
+                pos = stat.find(published_by)
+                start = pos + length
+                stat: str = stat[start:]
+                stat = stat.replace("</span><span>", "")
+                stat = stat.replace("</span></div>", "")
+                stat = stat.replace('<a class="orm-Link-root" ', "")
+                stat = stat.replace('</a>', "")
+                stat = stat.replace('href="', "")
+
+                publisher_link, publisher_name = stat.split('">')
+                publisher = Publisher(publisher_name, publisher_link)
+                BOOK_DATA.publisher = publisher
+# endregion get bublisher
+# region get publication date
+            publication_date = "PUBLICATION DATE:"
+            if publication_date in stat:
+                length = len(publication_date)
+                pos = stat.find(publication_date)
+                start = pos + length
+                stat: str = stat[start:]
+                stat = stat.replace("</span><span>", "")
+                stat = stat.replace("</span></div>", "")
+
+                date_ = datetime.datetime.strptime(stat, "%B %Y")
+                BOOK_DATA.publication_date = date_
+# endregion get publication date
+# endregion get stats block
+
+        element = soup.find("section", attrs={"class" : re.compile("description--")})
+        text = html2text.html2text(str(element))
+        ic(text)
+        print()
+        print(text)
+        print()
+        BOOK_DATA.description = text
+
+# endregion get_author_name() ----------------------------------------- get_author_name()
 
 
 # region get_book_data_from_files() ========================== get_book_data_from_files()
 def get_book_data_from_files():
-    # get_chapter_hierarchy()
-    get_cover_picture()
-    # TODO get book info into a dict
-    # TODO make org file with book info
-    # TODO book title
-    # TODO time to complete
+    # get_chapter_hierarchy() # DONE comment to toggle
+    # get_cover_picture() # DONE comment to toggle
+    get_data_from_saved_page()
     # TODO topics
     # TODO published by
     # TODO publication date
     # TODO review stars
-    # TODO author's name
     # TODO description text
     # TODO about the publisher
     # TODO resources sections
     # TODO get all reviews
-    # TODO get errata link
+    # TODO get errata link (resources)
 
+    # TODO make org file with book info
 
-    book_data.print()
+    BOOK_DATA.print()
 # endregion get_book_data_from_files() ---------------------- get_book_data_from_files()
 
 
