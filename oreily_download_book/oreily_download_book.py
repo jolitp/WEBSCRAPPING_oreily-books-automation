@@ -1,17 +1,17 @@
 #! /usr/bin/env python3
 
-# spell-checker: word jolitp pyautogui lxml chdir currentsrc cmdline
+# spell-checker: word jolitp pyautogui lxml chdir currentsrc cmdline xpath
 
 # region imports
 from pathlib import Path
 import time
-# from datetime import datetime
 import datetime
 from datetime import date
 import os
 import re
 from dataclasses import dataclass, field
 import subprocess
+from executing.executing import NodeFinder
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -83,7 +83,7 @@ class Book:
     # resources_section: str = ""
     publication_date: date = None
     is_early_release: bool = None
-    # stars: int = ""
+    stars: int = 0 # 0 means no reviews yet
     description: str = ""
     # reviews: list = field(default_factory=list)
     chapters: list = field(default_factory=list)
@@ -128,7 +128,7 @@ DRIVER = None
 CONSOLE = Console()
 
 LOGIN_PAGE = \
-"https://www.oreilly.com/member/login/?next=%2Fapi%2Fv1%2Fauth%2Fopenid%2Fauthorize%2F%3Fclient_id%3D235442%26redirect_uri%3Dhttps%3A%2F%2Flearning.oreilly.com%2Fcomplete%2Funified%2F%26state%3DpZpBIOIX0XRGL904QflVYoD4p59R7Cjm%26response_type%3Dcode%26scope%3Dopenid%2Bprofile%2Bemail&locale=en"
+"https://www.oreilly.com/member/login/?next=%2Fapi%2Fv1%2Fauth%2Fopenid%2Fauthorize%2F%3Fclient_id%3D235442%26redirect_uri%3Dhttps%3A%2F%2Flearning.oreilly.com%2Fcomplete%2Funified%2F%26state%3DbSFjglRdxCDV36ynSN2seSVHaB5069ME%26response_type%3Dcode%26scope%3Dopenid%2Bprofile%2Bemail&locale=en"
 # login information
 # registered at: 2021/07/14
 EMAIL = "vigope6498@ovooovo.com"
@@ -150,10 +150,10 @@ def click_element_given_xpath(xpath):
 # endregion click_element_given_xpath(...) --------------- click_element_given_xpath(...)
 
 
-# region img_pos(...) ====================================================== img_pos(...)
+# region img_center_pos(...) ======================================== img_center_pos(...)
 def img_center_pos(img_path:str) -> Point:
     return pyautogui.locateCenterOnScreen(img_path)
-# endregion img_pos(...) --------------------------------------------------- img_pos(...)
+# endregion img_center_pos(...) ------------------------------------- img_center_pos(...)
 
 
 # region click_on_img(...) ============================================ click_on_img(...)
@@ -191,9 +191,29 @@ def login_oreilly():
     password_field.send_keys(PASSWORD)
 
     # wait for sign in button to be clickable
-    time.sleep(.3)
-    password_field.send_keys(Keys.ENTER)
+    # time.sleep(.3)
+    # password_field.send_keys(Keys.ENTER)
+    time.sleep(1)
+    click_on_img("./img/login/sign_in_btn.png")
 # endregion login_oreilly() --------------------------------------------- login_oreilly()
+
+
+# region wait_for_login_to_be_successful() ============ wait_for_login_to_be_successful()
+def wait_for_login_to_be_successful():
+    waiting_for_login = True
+    while waiting_for_login:
+        time.sleep(.5)
+        logged_in_logo_pos = img_center_pos("./img/login/login_successful_logo.png")
+        user_menu_pos = img_center_pos("./img/login/user_is_logged_in.png")
+        ic(logged_in_logo_pos)
+        ic(user_menu_pos)
+
+        if logged_in_logo_pos and user_menu_pos:
+            waiting_for_login = False
+        # TODO check for cases where other screens appear and try again
+        ...
+    ...
+# endregion wait_for_login_to_be_successful() -------- wait_for_login_to_be_successful()
 
 
 # region get_book_chapter_links() ============================= get_book_chapter_links()
@@ -210,19 +230,16 @@ def get_book_chapter_links(page_source) -> list:
             full_link = "https://learning.oreilly.com" + link
             links_to_visit.append(full_link)
     return links_to_visit
-
 # endregion get_book_chapter_links() --------------------------- get_book_chapter_links()
 
 
 # region go_to_book_page(...) ===================================== go_to_book_page(...)
 def go_to_book_page(url: str):
     time.sleep(10)
-    DRIVER.get(url)
-    time.sleep(3)
+    wait_for_login_to_be_successful()
 
-# TODO check if login was successful
-    def check_if_login_is_successful():
-        ...
+    DRIVER.get(url)
+
     page_source = DRIVER.page_source
     global BOOK_FOLDER_PATH
     global BOOK_DATA
@@ -242,8 +259,8 @@ def go_to_book_page(url: str):
         DRIVER.get(link_to_visit)
 
         xpath = '//*[@id="main"]/section/div/div/span/span[1]'
-        el : WebElement = DRIVER.find_element_by_xpath(xpath)
-        el.click()
+        element : WebElement = DRIVER.find_element_by_xpath(xpath)
+        element.click()
 
         set_text_style()
 
@@ -527,13 +544,25 @@ def get_data_from_saved_page():
 # endregion get publication date
 # endregion get stats block
 
+# region get book description
         element = soup.find("section", attrs={"class" : re.compile("description--")})
         text = html2text.html2text(str(element))
-        ic(text)
-        print()
-        print(text)
-        print()
         BOOK_DATA.description = text
+# endregion get book description
+
+# region    get average rating
+        regex_ = re.compile("Average rating \\d out of \\d")
+        element = soup.find("span",
+                            attrs={
+                                "aria-label" : regex_
+                                })
+        element = str(element)
+        first_line = element.split("\n", maxsplit=1)[0]
+        first_line = first_line.replace('<span aria-label="Average rating ', "")
+        n_of_stars = first_line[0]
+        BOOK_DATA.stars = n_of_stars
+# endregion get average rating
+
 
 # endregion get_author_name() ----------------------------------------- get_author_name()
 
@@ -543,11 +572,7 @@ def get_book_data_from_files():
     # get_chapter_hierarchy() # DONE comment to toggle
     # get_cover_picture() # DONE comment to toggle
     get_data_from_saved_page()
-    # TODO topics
-    # TODO published by
-    # TODO publication date
     # TODO review stars
-    # TODO description text
     # TODO about the publisher
     # TODO resources sections
     # TODO get all reviews

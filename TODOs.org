@@ -52,16 +52,17 @@ get this info from the saved files
 ****** DONE topics (classification)
 ****** DONE published by
 ****** DONE publication date
-****** TODO review stars
+****** DONE review stars
 ****** DONE author's name
 ****** DONE description text
-****** TODO about the publisher
+****** NO about the publisher
 ****** TODO resources sections
 with the errata link
-****** TODO get all reviews
+****** NO get all reviews
 ****** DONE chapter hierarchy
 ***** TODO save description in markdown
 ***** TODO convert markdown to org via pandoc
+https://emacs.stackexchange.com/questions/5465/how-to-migrate-markdown-files-to-emacs-org-mode-format
 ***** TODO put the converted description in the org document with the other info
 ***** TODO put info into an org file
 ***** DONE download cover picture
