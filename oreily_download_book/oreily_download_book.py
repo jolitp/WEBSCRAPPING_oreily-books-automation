@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
-# spell-checker: word jolitp pyautogui lxml chdir currentsrc cmdline xpath
+# spell-checker: word jolitp pyautogui lxml chdir
+# spell-checker: word currentsrc cmdline xpath crdownload
 
 # region imports
 from pathlib import Path
@@ -11,13 +12,11 @@ import os
 import re
 from dataclasses import dataclass, field
 import subprocess
-from executing.executing import NodeFinder
+import shutil
 
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
-import selenium.webdriver.support.ui as ui
 
 from rich.console import Console
 from rich.traceback import install as rich_traceback_install
@@ -137,7 +136,7 @@ PASSWORD = "H3dg3h0g"
 
 
 # region globals
-BOOK_CHAPTER_LINKS = []
+BOOK_PAGES_DOWNLOADED = 0
 BOOK_FOLDER_PATH = None
 BOOK_DATA = Book()
 # endregion globals
@@ -205,8 +204,6 @@ def wait_for_login_to_be_successful():
         time.sleep(.5)
         logged_in_logo_pos = img_center_pos("./img/login/login_successful_logo.png")
         user_menu_pos = img_center_pos("./img/login/user_is_logged_in.png")
-        ic(logged_in_logo_pos)
-        ic(user_menu_pos)
 
         if logged_in_logo_pos and user_menu_pos:
             waiting_for_login = False
@@ -220,7 +217,7 @@ def wait_for_login_to_be_successful():
 def get_book_chapter_links(page_source) -> list:
     soup = BeautifulSoup(page_source, "lxml")
     list_of_h5s = soup.find_all("h5")
-
+    list_of_h6s = soup.find_all("h6")
     links_to_visit = []
     for chapter_tag in list_of_h5s:
         chapter_tag : str = str(chapter_tag)
@@ -229,7 +226,19 @@ def get_book_chapter_links(page_source) -> list:
             link = element.get("href")
             full_link = "https://learning.oreilly.com" + link
             links_to_visit.append(full_link)
-    return links_to_visit
+    for chapter_tag in list_of_h6s:
+        chapter_tag : str = str(chapter_tag)
+        soup = BeautifulSoup(chapter_tag, "lxml")
+        for element in soup.findAll("a"):
+            link = element.get("href")
+            full_link = "https://learning.oreilly.com" + link
+            links_to_visit.append(full_link)
+    chapter_links = []
+    for link in links_to_visit:
+        if not "#" in link:
+            chapter_links.append(link)
+        ...
+    return chapter_links
 # endregion get_book_chapter_links() --------------------------- get_book_chapter_links()
 
 
@@ -247,7 +256,7 @@ def go_to_book_page(url: str):
     BOOK_DATA.title = DRIVER.title
     BOOK_FOLDER_PATH = CWD / BOOK_DATA.title
 
-    return None # uncomment to test w/o saving pages
+    # return None # uncomment to test w/o saving pages
 
     links_to_visit = get_book_chapter_links(page_source)
 
@@ -344,34 +353,55 @@ def save_page(url):
         if continue_save_btn_pos:
             waiting_for_save = False
 
+    # get all files in downloads directory
+    all_files_before = os.listdir(DOWNLOADS_FOLDER_PATH)
+
     # click on the confirmation that appears
     pyautogui.click(continue_save_btn_pos)
 
-    time.sleep(1)
+# region wait download to finish
+    wait_download_to_finish = True
+    while wait_download_to_finish:
+        time.sleep(.5)
+        all_files_after = os.listdir(DOWNLOADS_FOLDER_PATH)
 
-# TODO use another method to get the path to current file
-# the idea is getting the list of all files in the downloads directory
-# before downloading the file, and another list after, and comparing
-# both to get the name of the newly downloaded file
-    page_title = DRIVER.title
-    page_title = page_title.replace("|", "_")
-    page_title = page_title.replace(":", "_")
+        set_difference = set(all_files_after) - set(all_files_before)
+        list_difference = list(set_difference)
+        file_name = list_difference[0]
+        if file_name.endswith(".crdownload"):
+            continue
+        if list_difference:
+            wait_download_to_finish = False
+    file_name = list_difference[0]
+# endregion wait download to finish
 
+# region move downloaded file to book folder in cwd
     if not BOOK_FOLDER_PATH.exists():
         BOOK_FOLDER_PATH.mkdir()
 
-    saved_file_path = DOWNLOADS_FOLDER_PATH / f"{page_title}.html"
-    # ic(saved_file_path)
-
-    time.sleep(3)
+    saved_file_path = DOWNLOADS_FOLDER_PATH / file_name
 
     src = saved_file_path
-    index = len(BOOK_CHAPTER_LINKS)
-    dst = BOOK_FOLDER_PATH / f"{index}_{page_title}.html"
+    index = BOOK_PAGES_DOWNLOADED
 
-    os.rename(src, dst)
+    result = ""
+    regex_ = re.compile(r"https:\/\/(.*)\/(.*).html")
+    match = regex_.match(url)
+    if match:
+        result = match.group(2)
 
-    BOOK_CHAPTER_LINKS.append(url)
+    file_name = file_name.replace(" _ ", " - ")
+    if result:
+        dst = BOOK_FOLDER_PATH / f"{index:0>3d} - {result} - {file_name}"
+    else:
+        dst = BOOK_FOLDER_PATH / f"{index:0>3d} - {file_name}"
+
+    # os.rename(src, dst)
+    shutil.move(src, dst)
+# endregion move downloaded file to book folder in cwd
+
+    global BOOK_PAGES_DOWNLOADED
+    BOOK_PAGES_DOWNLOADED += 1
 # endregion save_page(...) ---------------------------------------------- save_page(...)
 
 
@@ -404,7 +434,6 @@ def get_chapter_sections(chapter_files):
                 pattern = re.compile('(<section data-pdf-bookmark=")(.*)(" data)')
                 matched = pattern.match(section)
                 title = matched.group(2)
-                # ic(title)
                 sections.append(title)
             chapter_sections.append(sections)
     return chapter_sections
@@ -456,8 +485,6 @@ def get_cover_picture():
         os.chdir(BOOK_FOLDER_PATH)
         cmd = [ "wget", '-O','cover.jpeg' , img_url]
         # cmd_str = subprocess.list2cmdline(cmd)
-        # ic(cmd)
-        # ic(cmd_str)
         subprocess.run(cmd)
         os.chdir(CWD)
 # endregion get_cover_picture() ------------------------------------- get_cover_picture()
@@ -580,7 +607,7 @@ def get_book_data_from_files():
 
     # TODO make org file with book info
 
-    BOOK_DATA.print()
+    # BOOK_DATA.print()
 # endregion get_book_data_from_files() ---------------------- get_book_data_from_files()
 
 
@@ -588,7 +615,8 @@ def get_book_data_from_files():
 def main():
     setup_driver()
     login_oreilly()
-    url = "https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/"
+    # url = "https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/"
+    url = "https://learning.oreilly.com/library/view/mastering-python-for/9781784394516/"
     go_to_book_page(url)
     get_book_data_from_files()
     DRIVER.close()

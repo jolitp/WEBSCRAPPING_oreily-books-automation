@@ -6,7 +6,8 @@
 https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 **** steps
 ***** DONE login at the site
-***** TODO check if the login was successful
+***** DONE wait for login to finish
+***** TODO restart if end up in a wrong page
 ***** DONE load book page
 ***** DONE download front page of the book
 ***** DONE get page title
@@ -27,7 +28,8 @@ https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 
 the number after the book name is not the ISBN, it is an ID from oreilly
 ******* DONE get chapter order number
-***** TODO go to each link from each chapter
+******* DONE corner case where chapter pages are in h6 headers instead of h5
+***** DONE go to each link from each chapter
 ****** DONE click on the gear to the left
 ******* DONE scroll down the page
 so the download panel don't interfere
@@ -39,7 +41,7 @@ check for both possible icons
 ****** DONE close the right side bar containing the toc
 ****** DONE scroll down to the end of the page
 ****** DONE save the page
-****** TODO get a list of all files in the downloads directory
+****** DONE get a list of all files in the downloads directory
 ****** DONE remove special characters from the name
 for now the problem is the | character
 also the : is replaced too
