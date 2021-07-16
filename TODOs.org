@@ -3,7 +3,13 @@
 *** search and get book pages
 *** download book
 **** test page
+***** basic test
 https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
+***** many authors
+https://learning.oreilly.com/library/view/hbr-emotional-intelligence/9781633699427/
+***** packt book (different chapter structure)
+https://learning.oreilly.com/library/view/mastering-python-for/9781784394516/
+
 **** steps
 ***** DONE login at the site
 ***** DONE wait for login to finish
@@ -47,26 +53,16 @@ for now the problem is the | character
 also the : is replaced too
 ****** DONE name the page apropriately
 ****** DONE move the page to cwd
-***** TODO get info
-get this info from the saved files
-****** DONE book title
-****** DONE time to complete
-****** DONE topics (classification)
-****** DONE published by
-****** DONE publication date
-****** DONE review stars
-****** DONE author's name
-****** DONE description text
-****** NO about the publisher
-****** TODO resources sections
-with the errata link
-****** NO get all reviews
-****** DONE chapter hierarchy
-***** TODO save description in markdown
-***** TODO convert markdown to org via pandoc
-https://emacs.stackexchange.com/questions/5465/how-to-migrate-markdown-files-to-emacs-org-mode-format
-***** TODO put the converted description in the org document with the other info
-***** TODO put info into an org file
 ***** DONE download cover picture
+**** todos
+***** TODO make script receive link for the book page
+***** TODO make script read a text file in cwd to download many books
+*** create org file from downloaded book pages
+**** problems
+***** how to get to the book pages?
+****** option 1: pass a folder as a parameter to script
+****** option 2: get all folders on cwd and process each one
+****** option 3: use script in the folder with the files
+
 ** audiobookbay
 ** pdf optimizer
