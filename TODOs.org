@@ -1,6 +1,92 @@
 * books automation - TODOs
 ** oreily
 *** search and get book pages
+**** steps
+***** DONE command line interface
+****** DONE args
+******* DONE search term
+--search / -s
+******* DONE formats (type of content)
+--format / -f
+query in url (name in UI)
+query -> =&formats==
+- book (books)
+- video (videos)
+- live (live events)
+- learning (learning paths)
+- collection (playlists)
+- sandbox/scenario/notebook (interactive)
+- certs%20practice%20exam (practice exams)
+
+******* DONE sort by
+--by / -b
+******* DONE topics
+appears in the following
+******** all
+******** books
+******** videos
+******** live events
+******** learning paths
+******** playlists
+******** interactive
+******** practice exams
+******* DONE publishers
+--publishers / -p
+******* DONE publication date
+******* DONE rating
+******* DONE reverse
+go to the last page of the search and go backwards
+******* DONE number of pages
+how many pages to scrape
+******* DONE video type
+******* DONE interactive type
+****** DONE parse args to options object
+******* DONE search term
+******* DONE format
+******* DONE sort by
+******* DONE topics
+******* DONE publishers
+******* DONE minimum publication date
+******* DONE minimum rating
+******* DONE reverse
+******* DONE number of pages
+******* DONE video type
+******* DONE interactive type
+
+***** DONE login to oreily
+***** DONE find the search box
+***** DONE wait for the search results page to load
+****** DONE find with pyautogui
+******* DONE the pressence of the spinning wheel
+******* DONE the abscence of the spinning wheel
+******* DONE the presence of the sort by dropdown menu
+***** TODO find elements on the page that correspond to options
+****** TODO find with selenium
+**** search query/url structure
+https://learning.oreilly.com/search/
+***** queries in url
+?query=a
+&extended_publisher_data=true
+&highlight=true
+&include_assessments=false
+&include_case_studies=true
+&include_courses=true
+&include_playlists=true
+&include_collections=true
+&include_notebooks=true
+&include_sandboxes=true
+&include_scenarios=true
+&is_academic_institution_account=false
+&source=user
+&formats=book
+&sort=relevance
+&facet_json=true
+&json_facets=true
+&page=0
+&include_facets=false
+&include_practice_exams=true
+
+*** get books from a topics section
 *** download book
 **** test page
 ***** basic test
@@ -9,6 +95,9 @@ https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/
 https://learning.oreilly.com/library/view/hbr-emotional-intelligence/9781633699427/
 ***** packt book (different chapter structure)
 https://learning.oreilly.com/library/view/mastering-python-for/9781784394516/
+***** Code: The Hidden Language of Computer Hardware and Software, First Edition
+different contents section
+https://learning.oreilly.com/library/view/code-the-hidden/9780735634688/
 
 **** steps
 ***** DONE login at the site
@@ -57,6 +146,11 @@ also the : is replaced too
 **** todos
 ***** TODO make script receive link for the book page
 ***** TODO make script read a text file in cwd to download many books
+*** dowonload video course
+**** extension
+***** My O'Reilly Downloader
+https://chrome.google.com/webstore/detail/my-oreilly-downloader/deebiaolijlopiocielojiipnpnaldlk?hl=en
+
 *** create org file from downloaded book pages
 **** problems
 ***** how to get to the book pages?
@@ -66,3 +160,28 @@ also the : is replaced too
 
 ** audiobookbay
 ** pdf optimizer
+* calculations
+** space
+50,512 books at average 100mb
+
+1G of books = 10 books
+
+10G of books = 100 books
+
+100G of books (uncompressed) = 30G - 50G (compressed) = 1,000 books
+
+10,000 books = 400G
+
+50,000 books ~= 2TB
+** time
+ten minutes to download a book
+
+6 books / hour
+
+6 * 24 books / day = 144 books a day
+
+144 * 30 books a month = ~450 books / month
+
+450 * 12 books / year = 5000 books / year
+
+to download 50,000 books you need 10 years full time
