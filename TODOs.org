@@ -55,13 +55,34 @@ how many pages to scrape
 
 ***** DONE login to oreily
 ***** DONE find the search box
-***** DONE wait for the search results page to load
-****** DONE find with pyautogui
+***** TODO wait for the search results page to load
+****** TODO find with pyautogui
 ******* DONE the pressence of the spinning wheel
 ******* DONE the abscence of the spinning wheel
 ******* DONE the presence of the sort by dropdown menu
+******* TODO type of content icon on the first search result
+either one of the following
+******** TODO book icon
+******** TODO interactive icon
+******** TODO live icon
+******** TODO learning path icon
+******** TODO playlist icon
+******** TODO practice exam icon
+******** TODO video icon
+******* TODO corner case: no result for search
 ***** TODO find elements on the page that correspond to options
 ****** TODO find with selenium
+******* TODO search options/type of content
+******* TODO dropdown menu filters
+******** TODO topics
+******** TODO publishers
+******** TODO publication date
+******** TODO rating
+******** TODO sort by
+***** TODO for each page
+****** TODO get search result list
+****** TODO go to next page
+
 **** search query/url structure
 https://learning.oreilly.com/search/
 ***** queries in url

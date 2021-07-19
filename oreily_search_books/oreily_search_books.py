@@ -150,8 +150,10 @@ class Options():
 # region constants
 rich_traceback_install()
 
+
 CHROME_DRIVER_PATH = Path("/home/jolitp/Applications/chromedriver")
 DOWNLOADS_FOLDER_PATH = Path("/home/jolitp/Downloads/")
+SCRIPT_FOLDER_PATH = Path(os.path.realpath(__file__)).parent
 CWD = Path(os.getcwd())
 DRIVER : webdriver.chrome.webdriver.WebDriver = None
 CONSOLE = Console()
@@ -217,7 +219,7 @@ def login_oreilly():
     # time.sleep(.3)
     # password_field.send_keys(Keys.ENTER)
     time.sleep(1)
-    click_on_img("./img/login/sign_in_btn.png")
+    click_on_img(f"{SCRIPT_FOLDER_PATH}/img/login/sign_in_btn.png")
 # endregion login_oreilly() --------------------------------------------- login_oreilly()
 
 
@@ -226,8 +228,9 @@ def wait_for_login_to_be_successful():
     waiting_for_login = True
     while waiting_for_login:
         time.sleep(.5)
-        logged_in_logo_pos = img_center_pos("./img/login/login_successful_logo.png")
-        user_menu_pos = img_center_pos("./img/login/user_is_logged_in.png")
+
+        logged_in_logo_pos = img_center_pos(f"{SCRIPT_FOLDER_PATH}/img/login/login_successful_logo.png")
+        user_menu_pos = img_center_pos(f"{SCRIPT_FOLDER_PATH}/img/login/user_is_logged_in.png")
 
         if logged_in_logo_pos and user_menu_pos:
             waiting_for_login = False
@@ -251,10 +254,10 @@ def has_img_on_screen(img_path: str) -> bool:
 
 # region wait_search_page_to_load() ========================= wait_search_page_to_load()
 def wait_search_page_to_load():
+    # wait the spinning wheel appear and disappear
     search_page_loaded = False
     while not search_page_loaded:
-        spinning_wheel_img = "./img/search_page/spinning.png"
-        # sort_by_relevance_btn_img = "./img/search_page/sort_by_relevance.png"
+        spinning_wheel_img = f"{SCRIPT_FOLDER_PATH}/img/search_page/spinning.png"
         spinning_wheel_is_on_screen = \
             has_img_on_screen(spinning_wheel_img)
 
@@ -265,25 +268,48 @@ def wait_search_page_to_load():
             # check the absence of the spinning wheel
             if not spinning_wheel_is_on_screen:
                 search_page_loaded = True
-                passed_spinning_wheel_ss_img = pyautogui.screenshot()
-                passed_spinning_wheel_ss_img.save(
-                    "./01_passed_spinning_wheel_ss_img.png")
+                # debugging code
+                # passed_spinning_wheel_ss_img = pyautogui.screenshot()
+                # passed_spinning_wheel_ss_img.save(
+                #     "./01_passed_spinning_wheel_ss_img.png")
                 break
 
     # check the presence of the dropdown menus
     search_page_loaded = False
     while not search_page_loaded:
-        sort_by_relevance_btn_img = "./img/search_page/sort_by_relevance.png"
+        sort_by_relevance_btn_img = f"{SCRIPT_FOLDER_PATH}/img/search_page/sort_by_relevance.png"
         sort_by_relevance_btn_is_on_screen = \
             has_img_on_screen(sort_by_relevance_btn_img)
 
         if sort_by_relevance_btn_is_on_screen:
             search_page_loaded = True
-            passed_sort_by_relevance_btn_ss_img = pyautogui.screenshot()
-            passed_sort_by_relevance_btn_ss_img.save(
-                "./02_passed_sort_by_relevance_btn_ss_img.png")
-            ...
-        ...
+            # debugging code
+            # passed_sort_by_relevance_btn_ss_img = pyautogui.screenshot()
+            # passed_sort_by_relevance_btn_ss_img.save(
+            #     "./02_passed_sort_by_relevance_btn_ss_img.png")
+
+    # check the presence of type of content icons
+    search_page_loaded = False
+    while not search_page_loaded:
+        possible_icons = [
+            has_img_on_screen(
+                f"{SCRIPT_FOLDER_PATH}/img/content_types/book icon.png"),
+            has_img_on_screen(
+                f"{SCRIPT_FOLDER_PATH}/img/content_types/interactive icon.png"),
+            has_img_on_screen(
+                f"{SCRIPT_FOLDER_PATH}/img/content_types/learning path icon.png"),
+            has_img_on_screen(
+                f"{SCRIPT_FOLDER_PATH}/img/content_types/live icon.png"),
+            has_img_on_screen(
+                f"{SCRIPT_FOLDER_PATH}/img/content_types/playlist icon.png"),
+            has_img_on_screen(
+                f"{SCRIPT_FOLDER_PATH}/img/content_types/practice exam icon.png"),
+            has_img_on_screen(
+                f"{SCRIPT_FOLDER_PATH}/img/content_types/video icon.png")
+        ]
+
+        if any(possible_icons):
+            search_page_loaded = True
 # endregion wait_search_page_to_load() ---------------------- wait_search_page_to_load()
 
 
@@ -412,6 +438,14 @@ def parse_arguments(argument_parser) -> Options:
 # endregion parse_arguments() ----------------------------------------- parse_arguments()
 
 
+# region filter_search_results() =============================== filter_search_results()
+def filter_content_type(search_options: Options):
+
+
+    ...
+# endregion filter_search_results() ----------------------------- filter_search_results()
+
+
 # region main() ================================================================= main()
 def main():
     parser = define_cli()
@@ -420,6 +454,7 @@ def main():
     login_oreilly()
     go_to_search_page(search_options)
     wait_search_page_to_load()
+    filter_content_type(search_options)
 
     # DRIVER.close()
     CONSOLE.print("[bold green]finished[/]")
