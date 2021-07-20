@@ -19,6 +19,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.webdriver import WebDriver
 
 from rich.console import Console
 from rich.traceback import install as rich_traceback_install
@@ -37,6 +38,54 @@ from icecream import ic
 
 
 # region classes
+@dataclass
+class SearchPageElements():
+    @dataclass
+    class ContentType():
+        all: WebElement = None
+        books: WebElement = None
+        videos: WebElement = None
+        live_events: WebElement = None
+        learning_paths: WebElement = None
+        playlists: WebElement = None
+        interactive: WebElement = None
+        practice_exam: WebElement = None
+
+# the string representation is weird
+        # def __str__(self) -> str:
+        #     result = ""
+        #     result += f"all btn:\n{self.all}\n"
+        #     result += f"books btn:\n{self.books}\n"
+        #     result += f"videos btn:\n{self.videos}\n"
+        #     result += f"live events btn:\n{self.live_events}\n"
+        #     result += f"learning paths btn:\n{self.learning_paths}\n"
+        #     result += f"playlists btn:\n{self.playlists}\n"
+        #     result += f"interactive btn:\n{self.interactive}\n"
+        #     result += f"practice exam btn:\n{self.practice_exam}\n"
+        #     return result
+
+        # def print(self):
+        #     print(self.__str__)
+
+    @dataclass
+    class FilteringOptions():
+        # TODO change type to beautiful soup element maybe?
+        topics: WebElement = None
+        publishers: WebElement = None
+        publication_date: WebElement = None
+        rating: WebElement = None
+        sort_by: WebElement = None
+        video_type: WebElement = None
+        interactive_type: WebElement = None
+# TODO make __str__ function
+# TODO make print function
+
+    content_type: ContentType = ContentType()
+    filtering_options: FilteringOptions = FilteringOptions()
+
+# TODO make __str__ function
+# TODO make print function
+
 class Format(Enum):
     ALL = 'all'
     BOOKS = 'books'
@@ -143,7 +192,6 @@ class Options():
             output += "  interactive_type : InteractiveType      = {}\n" \
                 .format(None)
         print(output)
-        ...
 # endregion classes
 
 
@@ -153,19 +201,22 @@ rich_traceback_install()
 
 CHROME_DRIVER_PATH = Path("/home/jolitp/Applications/chromedriver")
 DOWNLOADS_FOLDER_PATH = Path("/home/jolitp/Downloads/")
-SCRIPT_FOLDER_PATH = Path(os.path.realpath(__file__)).parent
+SCRIPT_DIR = Path(os.path.realpath(__file__)).parent
 CWD = Path(os.getcwd())
-DRIVER : webdriver.chrome.webdriver.WebDriver = None
+DRIVER : WebDriver = None
 CONSOLE = Console()
 
 LOGIN_PAGE = \
-"https://www.oreilly.com/member/login/?next=%2Fapi%2Fv1%2Fauth%2Fopenid%2Fauthorize%2F%3Fclient_id%3D235442%26redirect_uri%3Dhttps%3A%2F%2Flearning.oreilly.com%2Fcomplete%2Funified%2F%26state%3DbSFjglRdxCDV36ynSN2seSVHaB5069ME%26response_type%3Dcode%26scope%3Dopenid%2Bprofile%2Bemail&locale=en"
+'https://www.oreilly.com/member/login/?next=%2Fapi%2Fv1%2Fauth%2Fopenid%2Fauthorize%2F%3Fclient_id%3D235442%26redirect_uri%3Dhttps%3A%2F%2Flearning.oreilly.com%2Fcomplete%2Funified%2F%26state%3DvzLnDhsIcfDZHwmYg6AdxKtlVPt0Tor9%26response_type%3Dcode%26scope%3Dopenid%2Bprofile%2Bemail&locale=en'
+# "https://www.oreilly.com/member/login/?next=%2Fapi%2Fv1%2Fauth%2Fopenid%2Fauthorize%2F%3Fclient_id%3D235442%26redirect_uri%3Dhttps%3A%2F%2Flearning.oreilly.com%2Fcomplete%2Funified%2F%26state%3DbSFjglRdxCDV36ynSN2seSVHaB5069ME%26response_type%3Dcode%26scope%3Dopenid%2Bprofile%2Bemail&locale=en"
+# "https://www.oreilly.com/member/login"
 # login information
 # registered at: 2021/07/14
 EMAIL = "vigope6498@ovooovo.com"
 PASSWORD = "H3dg3h0g"
 
 OPTIONS = None
+ACTIVE_CONTENT_FORMAT = None
 # endregion constants
 
 
@@ -219,7 +270,15 @@ def login_oreilly():
     # time.sleep(.3)
     # password_field.send_keys(Keys.ENTER)
     time.sleep(1)
-    click_on_img(f"{SCRIPT_FOLDER_PATH}/img/login/sign_in_btn.png")
+
+    sign_in_btn_img = f"{SCRIPT_DIR}/img/login/sign_in_btn.png"
+    can_click_on_sign_in_btn = False
+    while not can_click_on_sign_in_btn:
+        sign_in_btn_on_screen = has_img_on_screen(sign_in_btn_img)
+
+        if sign_in_btn_on_screen:
+            can_click_on_sign_in_btn = True
+    click_on_img(sign_in_btn_img)
 # endregion login_oreilly() --------------------------------------------- login_oreilly()
 
 
@@ -229,8 +288,8 @@ def wait_for_login_to_be_successful():
     while waiting_for_login:
         time.sleep(.5)
 
-        logged_in_logo_pos = img_center_pos(f"{SCRIPT_FOLDER_PATH}/img/login/login_successful_logo.png")
-        user_menu_pos = img_center_pos(f"{SCRIPT_FOLDER_PATH}/img/login/user_is_logged_in.png")
+        logged_in_logo_pos = img_center_pos(f"{SCRIPT_DIR}/img/login/login_successful_logo.png")
+        user_menu_pos = img_center_pos(f"{SCRIPT_DIR}/img/login/user_is_logged_in.png")
 
         if logged_in_logo_pos and user_menu_pos:
             waiting_for_login = False
@@ -257,7 +316,7 @@ def wait_search_page_to_load():
     # wait the spinning wheel appear and disappear
     search_page_loaded = False
     while not search_page_loaded:
-        spinning_wheel_img = f"{SCRIPT_FOLDER_PATH}/img/search_page/spinning.png"
+        spinning_wheel_img = f"{SCRIPT_DIR}/img/search_page/spinning.png"
         spinning_wheel_is_on_screen = \
             has_img_on_screen(spinning_wheel_img)
 
@@ -277,7 +336,7 @@ def wait_search_page_to_load():
     # check the presence of the dropdown menus
     search_page_loaded = False
     while not search_page_loaded:
-        sort_by_relevance_btn_img = f"{SCRIPT_FOLDER_PATH}/img/search_page/sort_by_relevance.png"
+        sort_by_relevance_btn_img = f"{SCRIPT_DIR}/img/search_page/sort_by_relevance.png"
         sort_by_relevance_btn_is_on_screen = \
             has_img_on_screen(sort_by_relevance_btn_img)
 
@@ -293,19 +352,19 @@ def wait_search_page_to_load():
     while not search_page_loaded:
         possible_icons = [
             has_img_on_screen(
-                f"{SCRIPT_FOLDER_PATH}/img/content_types/book icon.png"),
+                f"{SCRIPT_DIR}/img/content_types/book icon.png"),
             has_img_on_screen(
-                f"{SCRIPT_FOLDER_PATH}/img/content_types/interactive icon.png"),
+                f"{SCRIPT_DIR}/img/content_types/interactive icon.png"),
             has_img_on_screen(
-                f"{SCRIPT_FOLDER_PATH}/img/content_types/learning path icon.png"),
+                f"{SCRIPT_DIR}/img/content_types/learning path icon.png"),
             has_img_on_screen(
-                f"{SCRIPT_FOLDER_PATH}/img/content_types/live icon.png"),
+                f"{SCRIPT_DIR}/img/content_types/live icon.png"),
             has_img_on_screen(
-                f"{SCRIPT_FOLDER_PATH}/img/content_types/playlist icon.png"),
+                f"{SCRIPT_DIR}/img/content_types/playlist icon.png"),
             has_img_on_screen(
-                f"{SCRIPT_FOLDER_PATH}/img/content_types/practice exam icon.png"),
+                f"{SCRIPT_DIR}/img/content_types/practice exam icon.png"),
             has_img_on_screen(
-                f"{SCRIPT_FOLDER_PATH}/img/content_types/video icon.png")
+                f"{SCRIPT_DIR}/img/content_types/video icon.png")
         ]
 
         if any(possible_icons):
@@ -438,12 +497,181 @@ def parse_arguments(argument_parser) -> Options:
 # endregion parse_arguments() ----------------------------------------- parse_arguments()
 
 
-# region filter_search_results() =============================== filter_search_results()
-def filter_content_type(search_options: Options):
+# region choose_search_results() =============================== choose_search_results()
+def choose_content_type(
+    search_options: Options,
+    search_page_elements: SearchPageElements,
+    ):
+    """
+    choose the content type to be displayed at the page,
+    based on search_options, and using search_page_elemens
+    as elements to be clicked on.
 
+    Args:
+        search_options (Options): the options the user chose on the command line
+        search_page_elements (SearchPageElements): the "anchors" of elements on the page
+    """
+
+# TODO properly implement the format selection based on cli arguments
+    global ACTIVE_CONTENT_FORMAT
+    ACTIVE_CONTENT_FORMAT = search_options.format
+    book_btn = search_page_elements.content_type.playlists
+    book_btn.click()
+    ACTIVE_CONTENT_FORMAT = Format(Format.PLAYLISTS)
 
     ...
-# endregion filter_search_results() ----------------------------- filter_search_results()
+# endregion choose_search_results() ----------------------------- choose_search_results()
+
+
+# region get_content_type_elements() ======================= get_content_type_elements()
+def get_content_type_elements(
+    search_page_elements: SearchPageElements
+    ) -> SearchPageElements:
+    """gets the html elements for the content type buttons on the search results page"""
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[1]/button"
+    search_page_elements.content_type.all = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[2]/button"
+    search_page_elements.content_type.books = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[3]/button"
+    search_page_elements.content_type.videos = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[4]/button"
+    search_page_elements.content_type.live_events = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[5]/button"
+    search_page_elements.content_type.learning_paths = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[6]/button"
+    search_page_elements.content_type.playlists = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[7]/button"
+    search_page_elements.content_type.interactive = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    xpath = \
+"/html/body/div[1]/div/div/div[2]/main/div/div/header/section[2]/nav/ul/li[8]/button"
+    search_page_elements.content_type.practice_exam = \
+        DRIVER.find_element_by_xpath(xpath)
+    del xpath
+
+    return search_page_elements
+# endregion get_content_type_elements() -------------------- get_content_type_elements()
+
+
+# region get_filter_menus_elements(...) ================= get_filter_menus_elements(...)
+def get_filter_menus_elements(
+    search_page_elements: SearchPageElements
+    ) -> SearchPageElements:
+    """
+    get the page elements for the filtering options, populates the search_page_elements
+    object and returns it.
+
+    Args:
+        search_page_elements (SearchPageElements): the object containing the search
+            page elements.
+
+    Returns:
+        SearchPageElements: the same object passed in now with all filter menus
+        present on the page.
+    """
+    wrapper_xpath = "/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]"
+    wrapper_element:WebElement = DRIVER.find_element_by_xpath(wrapper_xpath)
+
+    xpath = f"{wrapper_xpath}//button[contains(@class, 'Toggle')]"
+    menu_elements_list = \
+        wrapper_element.find_elements_by_xpath(xpath)
+    del xpath
+
+    for el in menu_elements_list:
+        el: WebElement = el
+
+        if "Topics" in el.text:
+            search_page_elements.filtering_options.topics = el
+        if "Publishers" in el.text:
+            search_page_elements.filtering_options.publishers = el
+        if "Publication Date" in el.text:
+            search_page_elements.filtering_options.publication_date = el
+        if "Rating" in el.text:
+            search_page_elements.filtering_options.rating = el
+        if "Video Type" in el.text:
+            search_page_elements.filtering_options.video_type = el
+        if "Interactive Type" in el.text:
+            search_page_elements.filtering_options.interactive_type = el
+
+    # possible xpath locations for the sort by dropdown menu, based on the
+    # current type of content displayed on the page
+    # a simpler way of getting it is to get the length of the
+    # menu elements list and feeding it to the index of the last div
+    # before button
+
+    format_ = ACTIVE_CONTENT_FORMAT
+
+    if format_ == Format.ALL:
+        index = 1
+    if format_ == Format.BOOKS or \
+    format_ == Format.LEARNING_PATHS or \
+    format_ == Format.PLAYLISTS:
+        index = 2
+    if format_ == Format.VIDEOS or \
+    format_ == Format.INTERACTIVE:
+        index = 3
+    if format_ == Format.LIVE_EVENTS:
+        index = None
+
+    if index:
+        sort_by_btn_xpath = \
+f'/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]/div[{index}]/button'
+#     sort_by_btn_xpath_all = \
+# '/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]/div[1]/button'
+#     sort_by_btn_xpath_books = \
+# '/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]/div[2]/button'
+#     sort_by_btn_xpath_videos = \
+# '/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]/div[3]/button'
+#     # sort_by_btn_xpath_live_events = "not available(does not show)"
+#     sort_by_btn_xpath_learning_paths = \
+# '/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]/div[2]/button'
+#     sort_by_btn_xpath_playlists = \
+# '/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]/div[2]/button'
+#     sort_by_btn_xpath_interactive = \
+# '/html/body/div[1]/div/div/div[2]/main/div/div/header/section[3]/div[3]/button'
+
+        sort_by_bnt_element: WebElement = DRIVER.find_element_by_xpath(sort_by_btn_xpath)
+    # sort_by_bnt_element: WebElement = DRIVER.find_element_by_xpath(sort_by_btn_xpath)
+    # sort_by_bnt_element: WebElement = DRIVER.find_element_by_name("Sort By")
+    # sort_by_bnt_element: WebElement = DRIVER.find_element_by_partial_link_text("Sort By")
+
+    ic(sort_by_bnt_element.tag_name)
+    ic(sort_by_bnt_element.text)
+
+    sort_by_bnt_element.click()
+    search_page_elements.filtering_options.sort_by = sort_by_bnt_element
+# TODO get the sort by element
+
+    return search_page_elements
+# endregion get_filter_menus_elements(...) -------------- get_filter_menus_elements(...)
 
 
 # region main() ================================================================= main()
@@ -451,11 +679,20 @@ def main():
     parser = define_cli()
     search_options = parse_arguments(parser)
     setup_driver()
+
     login_oreilly()
     go_to_search_page(search_options)
     wait_search_page_to_load()
-    filter_content_type(search_options)
-
+    search_page_elements = SearchPageElements()
+    search_page_elements = get_content_type_elements(search_page_elements)
+    choose_content_type(search_options, search_page_elements)
+    search_page_elements = get_filter_menus_elements(search_page_elements)
+    # TODO get the page elements fo the page numbers below the page
+    # TODO apply filter using menus
+    # TODO get page list
+    # TODO make a loop to go to next page
+    # print("at main")
+    CONSOLE.print(search_page_elements)
     # DRIVER.close()
     CONSOLE.print("[bold green]finished[/]")
 # endregion main() -------------------------------------------------------------- main()

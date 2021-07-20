@@ -60,25 +60,25 @@ how many pages to scrape
 ******* DONE the pressence of the spinning wheel
 ******* DONE the abscence of the spinning wheel
 ******* DONE the presence of the sort by dropdown menu
-******* TODO type of content icon on the first search result
+******* DONE type of content icon on the first search result
 either one of the following
-******** TODO book icon
-******** TODO interactive icon
-******** TODO live icon
-******** TODO learning path icon
-******** TODO playlist icon
-******** TODO practice exam icon
-******** TODO video icon
+******** DONE book icon
+******** DONE interactive icon
+******** DONE live icon
+******** DONE learning path icon
+******** DONE playlist icon
+******** DONE practice exam icon
+******** DONE video icon
 ******* TODO corner case: no result for search
-***** TODO find elements on the page that correspond to options
-****** TODO find with selenium
-******* TODO search options/type of content
-******* TODO dropdown menu filters
-******** TODO topics
-******** TODO publishers
-******** TODO publication date
-******** TODO rating
-******** TODO sort by
+***** DONE find elements on the page that correspond to options
+****** DONE find with selenium
+******* DONE search options/type of content
+******* DONE dropdown menu filters
+******** DONE topics
+******** DONE publishers
+******** DONE publication date
+******** DONE rating
+******** DONE sort by
 ***** TODO for each page
 ****** TODO get search result list
 ****** TODO go to next page

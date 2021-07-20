@@ -32,7 +32,6 @@ rich_traceback_install()
 CHROME_DRIVER_PATH = Path("/home/jolitp/Applications/chromedriver")
 DOWNLOADS_FOLDER_PATH = Path("/home/jolitp/Downloads/")
 CWD = Path(os.getcwd())
-DRIVER = None
 CONSOLE = Console()
 # endregion constants
 
