@@ -5,6 +5,7 @@
 
 # region imports
 from pathlib import Path
+import sys
 import time
 import datetime
 from datetime import date, timedelta
@@ -13,6 +14,7 @@ import re
 from dataclasses import dataclass, field
 import subprocess
 import shutil
+import argparse
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -352,12 +354,16 @@ def get_cover_picture():
 
 # region main() ================================================================= main()
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('url')
+    args = parser.parse_args()
+    url = args.url
+
     setup_driver()
     login_oreilly()
     # url = "https://learning.oreilly.com/library/view/fluent-python-2nd/9781492056348/"
     # url = "https://learning.oreilly.com/library/view/mastering-python-for/9781784394516/"
-    url = "https://learning.oreilly.com/library/view/the-art-of/9781351803632/"
-
+    # url = "https://learning.oreilly.com/library/view/the-art-of/9781351803632/"
     go_to_book_page(url)
     # get_book_data_from_files()
     # create_org_file()
